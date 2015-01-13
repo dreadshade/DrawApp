@@ -31,16 +31,18 @@ public final class R {
         public static final int eraser=0x7f020001;
         public static final int ic_launcher=0x7f020002;
         public static final int new_pic=0x7f020003;
-        public static final int save=0x7f020004;
+        public static final int paint=0x7f020004;
+        public static final int paint_pressed=0x7f020005;
+        public static final int save=0x7f020006;
     }
     public static final class id {
         public static final int action_settings=0x7f090006;
-        public static final int draw_btn=0x7f090003;
-        public static final int drawing=0x7f090000;
-        public static final int erase_btn=0x7f090004;
-        public static final int new_btn=0x7f090002;
-        public static final int paint_colors=0x7f090001;
-        public static final int save_btn=0x7f090005;
+        public static final int draw_btn=0x7f090001;
+        public static final int drawing=0x7f090004;
+        public static final int erase_btn=0x7f090002;
+        public static final int new_btn=0x7f090000;
+        public static final int paint_colors=0x7f090005;
+        public static final int save_btn=0x7f090003;
     }
     public static final class integer {
         public static final int large_size=0x7f050002;
