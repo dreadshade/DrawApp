@@ -7,10 +7,14 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.view.MotionEvent;
 import android.view.View;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.util.TypedValue;
 
-public class DrawingView extends View {
+@SuppressLint("ClickableViewAccessibility") public class DrawingView extends View {
 
 	// drawing path
 	private Path drawPath;
@@ -22,13 +26,20 @@ public class DrawingView extends View {
 	private Canvas drawCanvas;
 	// canvas bitmap
 	private Bitmap canvasBitmap;
-
+	// brush size & last brush size used
+	private float brushSize, lastBrushSize;
+	
 	public DrawingView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		setupDrawing();
 	}
 
 	private void setupDrawing() {
+		
+		// set initial brush size
+		brushSize = getResources().getInteger(R.integer.medium_size);
+		lastBrushSize = brushSize;
+		
 		// get drawing area setup for interaction
 		drawPath = new Path();
 		drawPaint = new Paint();
@@ -38,7 +49,7 @@ public class DrawingView extends View {
 
 		// set properties
 		drawPaint.setAntiAlias(true);
-		drawPaint.setStrokeWidth(20);
+		drawPaint.setStrokeWidth(brushSize);
 		drawPaint.setStyle(Paint.Style.STROKE);
 		drawPaint.setStrokeJoin(Paint.Join.ROUND);
 		drawPaint.setStrokeCap(Paint.Cap.ROUND);
@@ -94,4 +105,19 @@ public class DrawingView extends View {
 		drawPaint.setColor(paintColor);
 		}
 
+	public void setBrushSize(float newSize){
+		//update size
+		float pixelAmount = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 
+			    newSize, getResources().getDisplayMetrics());
+			brushSize = pixelAmount;
+			drawPaint.setStrokeWidth(brushSize);
+		}
+	
+	public void setLastBrushSize(float lastSize){
+	    lastBrushSize = lastSize;
+	}
+	public float getLastBrushSize(){
+	    return lastBrushSize;
+	}
+	
 }
