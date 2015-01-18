@@ -18,9 +18,9 @@ import android.widget.Toast;
 public class MainActivity extends Activity implements OnClickListener {
 
 	private DrawingView drawView;
-	private ImageButton currPaint, drawBtn, eraseBtn, newBtn, saveBtn;
+	private ImageButton currPaint, drawBtn, eraseBtn, newBtn, saveBtn, loadBtn, exitBtn;
 	private float smallBrush, mediumBrush, largeBrush;
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -49,6 +49,13 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		saveBtn = (ImageButton) findViewById(R.id.save_btn);
 		saveBtn.setOnClickListener(this);
+		
+		loadBtn = (ImageButton) findViewById(R.id.load_btn);
+		loadBtn.setOnClickListener(this);
+		
+		exitBtn = (ImageButton) findViewById(R.id.exit_btn);
+		exitBtn.setOnClickListener(this);
+		
 	}
 
 	@Override
@@ -201,6 +208,31 @@ public class MainActivity extends Activity implements OnClickListener {
 						}
 					});
 			saveDialog.show();
+		}
+		
+		else if (view.getId() == R.id.exit_btn) {
+			// exit
+			AlertDialog.Builder newDialog = new AlertDialog.Builder(this);
+			newDialog.setTitle("Exit DrawApp");
+			newDialog
+					.setMessage("Would you like to exit DrawApp?");
+			newDialog.setPositiveButton("Yes",
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							finish();
+				            System.exit(0);
+						}
+					});
+			newDialog.setNegativeButton("Cancel",
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							dialog.cancel();
+						}
+					});
+			newDialog.show();
+		}
+		else if (view.getId() == R.id.load_btn) {
+			// load
 		}
 
 	}

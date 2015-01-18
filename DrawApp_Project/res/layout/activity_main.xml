@@ -39,6 +39,21 @@
             android:layout_height="fill_parent"
             android:contentDescription="@string/save"
             android:src="@drawable/save" />
+
+        <ImageButton
+            android:id="@+id/load_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:contentDescription="@string/load"
+            android:src="@drawable/load" />
+
+        <ImageButton
+            android:id="@+id/exit_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:contentDescription="@string/exit"
+            android:src="@drawable/exit" />
+        
     </LinearLayout>
 
     <com.example.drawapp.DrawingView
