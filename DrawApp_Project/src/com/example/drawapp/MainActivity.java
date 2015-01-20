@@ -1,26 +1,39 @@
 package com.example.drawapp;
 
 import android.app.Activity;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import java.util.UUID;
 import android.provider.MediaStore;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.view.View.OnClickListener;
 import android.widget.Toast;
 
 public class MainActivity extends Activity implements OnClickListener {
 
 	private DrawingView drawView;
-	private ImageButton currPaint, drawBtn, eraseBtn, newBtn, saveBtn, loadBtn, exitBtn;
+	private ImageView imageView;
+	private ImageButton currPaint, drawBtn, eraseBtn, newBtn, saveBtn, loadBtn,
+			exitBtn;
 	private float smallBrush, mediumBrush, largeBrush;
-	
+	private static final int SELECT_IMAGE = 1;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -49,13 +62,13 @@ public class MainActivity extends Activity implements OnClickListener {
 
 		saveBtn = (ImageButton) findViewById(R.id.save_btn);
 		saveBtn.setOnClickListener(this);
-		
+
 		loadBtn = (ImageButton) findViewById(R.id.load_btn);
 		loadBtn.setOnClickListener(this);
-		
+
 		exitBtn = (ImageButton) findViewById(R.id.exit_btn);
 		exitBtn.setOnClickListener(this);
-		
+
 	}
 
 	@Override
@@ -185,18 +198,23 @@ public class MainActivity extends Activity implements OnClickListener {
 						public void onClick(DialogInterface dialog, int which) {
 							// save drawing
 							drawView.setDrawingCacheEnabled(true);
-							String imgSaved = MediaStore.Images.Media.insertImage(
-								    getContentResolver(), drawView.getDrawingCache(),
-								    UUID.randomUUID().toString()+".png", "drawing");
-							if(imgSaved!=null){
-							    Toast savedToast = Toast.makeText(getApplicationContext(), 
-							        "Drawing saved to Gallery!", Toast.LENGTH_SHORT);
-							    savedToast.show();
-							}
-							else{
-							    Toast unsavedToast = Toast.makeText(getApplicationContext(), 
-							        "Oops! Image could not be saved.", Toast.LENGTH_SHORT);
-							    unsavedToast.show();
+							String imgSaved = MediaStore.Images.Media
+									.insertImage(getContentResolver(), drawView
+											.getDrawingCache(), UUID
+											.randomUUID().toString() + ".png",
+											"drawing");
+							if (imgSaved != null) {
+								Toast savedToast = Toast.makeText(
+										getApplicationContext(),
+										"Drawing saved to Gallery!",
+										Toast.LENGTH_SHORT);
+								savedToast.show();
+							} else {
+								Toast unsavedToast = Toast.makeText(
+										getApplicationContext(),
+										"Oops! Image could not be saved.",
+										Toast.LENGTH_SHORT);
+								unsavedToast.show();
 							}
 							drawView.destroyDrawingCache();
 						}
@@ -209,18 +227,17 @@ public class MainActivity extends Activity implements OnClickListener {
 					});
 			saveDialog.show();
 		}
-		
+
 		else if (view.getId() == R.id.exit_btn) {
 			// exit
 			AlertDialog.Builder newDialog = new AlertDialog.Builder(this);
 			newDialog.setTitle("Exit DrawApp");
-			newDialog
-					.setMessage("Would you like to exit DrawApp?");
+			newDialog.setMessage("Would you like to exit DrawApp?");
 			newDialog.setPositiveButton("Yes",
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int which) {
 							finish();
-				            System.exit(0);
+							System.exit(0);
 						}
 					});
 			newDialog.setNegativeButton("Cancel",
@@ -230,10 +247,47 @@ public class MainActivity extends Activity implements OnClickListener {
 						}
 					});
 			newDialog.show();
-		}
-		else if (view.getId() == R.id.load_btn) {
+		} else if (view.getId() == R.id.load_btn) {
 			// load
+			Intent gallery = new Intent(
+					Intent.ACTION_PICK,
+					android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+			startActivityForResult(gallery, SELECT_IMAGE);
 		}
 
 	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+
+		if (resultCode == RESULT_OK && requestCode == SELECT_IMAGE && null != data) {
+			Uri selectedImage = data.getData();
+			String[] path = { MediaStore.Images.Media.DATA };
+			
+			Cursor cursor = getContentResolver().query(selectedImage,
+	                 path, null, null, null);
+			cursor.moveToFirst();
+			int columnIndex = cursor.getColumnIndex(path[0]);
+			String picturePath = cursor.getString(columnIndex);
+			cursor.close();
+			
+			Bitmap bitmapImage = BitmapFactory.decodeFile(picturePath);
+			Bitmap scaledBitmap = scaleDown(bitmapImage, 460, 600);
+			imageView = (ImageView) findViewById(R.id.drawing);
+			imageView.setImageBitmap(scaledBitmap);
+
+		}
+	}
+	
+	public static Bitmap scaleDown(Bitmap bitmap, int wantedWidth, int wantedHeight) {
+        Bitmap output = Bitmap.createBitmap(wantedWidth, wantedHeight, Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+        Matrix m = new Matrix();
+        m.setScale((float) wantedWidth / bitmap.getWidth(), (float) wantedHeight / bitmap.getHeight());
+        canvas.drawBitmap(bitmap, m, new Paint());
+
+        return output;
+    }
+
 }
