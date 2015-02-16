@@ -1,17 +1,11 @@
 package com.example.drawapp;
 
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Path;
+import android.graphics.*;
 import android.view.MotionEvent;
 import android.view.View;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.util.TypedValue;
 
 @SuppressLint("ClickableViewAccessibility")
@@ -31,8 +25,14 @@ public class DrawingView extends View {
 	private float brushSize, lastBrushSize;
 	// erase
 	private boolean erase = false;
+    // path
+    private float mX, mY;
+    private static final float TOUCH_TOLERANCE = 8;
+    // options
+    //private BlurMaskFilter drawBlur;
+    //private static final float mRadius = 1/10;
 
-	public DrawingView(Context context, AttributeSet attrs) {
+    public DrawingView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		setupDrawing();
 	}
@@ -56,6 +56,10 @@ public class DrawingView extends View {
 		drawPaint.setStyle(Paint.Style.STROKE);
 		drawPaint.setStrokeJoin(Paint.Join.ROUND);
 		drawPaint.setStrokeCap(Paint.Cap.ROUND);
+        drawPaint.setDither(true);
+        // set properties - Blur-Mask
+    //    drawBlur = new BlurMaskFilter(1, BlurMaskFilter.Blur.NORMAL);
+    //    drawPaint.setMaskFilter(drawBlur);
 
 		canvasPaint = new Paint(Paint.DITHER_FLAG);
 
@@ -76,6 +80,16 @@ public class DrawingView extends View {
 		canvas.drawPath(drawPath, drawPaint);
 	}
 
+    private void touch_move(float x, float y) {
+        float dx = Math.abs(x - mX);
+        float dy = Math.abs(y - mY);
+        if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
+            drawPath.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
+            mX = x;
+            mY = y;
+        }
+    }
+
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		// detect user touch
@@ -84,12 +98,16 @@ public class DrawingView extends View {
 
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
+            drawPath.reset();
 			drawPath.moveTo(touchX, touchY);
+            mX = touchX;
+            mY = touchY;
 			break;
 		case MotionEvent.ACTION_MOVE:
-			drawPath.lineTo(touchX, touchY);
+            touch_move(touchX, touchY);
 			break;
 		case MotionEvent.ACTION_UP:
+            drawPath.lineTo(touchX, touchY);
 			drawCanvas.drawPath(drawPath, drawPaint);
 			drawPath.reset();
 			break;
@@ -138,5 +156,22 @@ public class DrawingView extends View {
 	    drawCanvas.drawColor(0, PorterDuff.Mode.CLEAR);
 	    invalidate();
 	}
+
+    public void loadBitmap(String picturePath){
+        Bitmap bitmapImage = BitmapFactory.decodeFile(picturePath);
+        Bitmap scaledBitmap = scaleDown(bitmapImage, 460, 600);
+        drawCanvas.drawBitmap(scaledBitmap,0,0,canvasPaint);
+        invalidate();
+    }
+
+    private static Bitmap scaleDown(Bitmap bitmap, int wantedWidth, int wantedHeight) {
+        Bitmap output = Bitmap.createBitmap(wantedWidth, wantedHeight, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+        Matrix m = new Matrix();
+        m.setScale((float) wantedWidth / bitmap.getWidth(), (float) wantedHeight / bitmap.getHeight());
+        canvas.drawBitmap(bitmap, m, new Paint());
+
+        return output;
+    }
 
 }

@@ -1,6 +1,7 @@
 package com.example.drawapp;
 
 import android.app.Activity;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
@@ -271,23 +272,14 @@ public class MainActivity extends Activity implements OnClickListener {
 			int columnIndex = cursor.getColumnIndex(path[0]);
 			String picturePath = cursor.getString(columnIndex);
 			cursor.close();
-			
-			Bitmap bitmapImage = BitmapFactory.decodeFile(picturePath);
-			Bitmap scaledBitmap = scaleDown(bitmapImage, 460, 600);
-			imageView = (ImageView) findViewById(R.id.drawing);
-			imageView.setImageBitmap(scaledBitmap);
+
+            drawView.loadBitmap( picturePath );
+
+
+           // drawView.setBackground(Drawable.createFromPath(picturePath));
+
 
 		}
 	}
-	
-	public static Bitmap scaleDown(Bitmap bitmap, int wantedWidth, int wantedHeight) {
-        Bitmap output = Bitmap.createBitmap(wantedWidth, wantedHeight, Config.ARGB_8888);
-        Canvas canvas = new Canvas(output);
-        Matrix m = new Matrix();
-        m.setScale((float) wantedWidth / bitmap.getWidth(), (float) wantedHeight / bitmap.getHeight());
-        canvas.drawBitmap(bitmap, m, new Paint());
-
-        return output;
-    }
 
 }
