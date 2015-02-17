@@ -1,7 +1,6 @@
 package com.example.drawapp;
 
 import android.app.Activity;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
@@ -10,6 +9,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+
 import java.util.UUID;
 import android.provider.MediaStore;
 import android.app.AlertDialog;
@@ -17,12 +17,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.view.View.OnClickListener;
 import android.widget.Toast;
 
@@ -111,6 +105,22 @@ public class MainActivity extends Activity implements OnClickListener {
 	@Override
 	public void onClick(View view) {
 		// respond to clicks
+        if (view.getId() == R.id.load_btn){
+        if (drawView.paths.size() > 0) {
+            drawView.undonePaths.add(drawView.paths
+                    .remove(drawView.paths.size() - 1));
+            drawView.invalidate();
+        }
+        }
+
+        if (view.getId() == R.id.exit_btn){
+            if (drawView.undonePaths.size() > 0) {
+                drawView.paths.add(drawView.undonePaths
+                        .remove(drawView.undonePaths.size() - 1));
+                drawView.invalidate();
+            }
+        }
+
 		if (view.getId() == R.id.draw_btn) {
 			// draw button clicked
 			final Dialog brushDialog = new Dialog(this);
@@ -228,7 +238,7 @@ public class MainActivity extends Activity implements OnClickListener {
 					});
 			saveDialog.show();
 		}
-
+/*
 		else if (view.getId() == R.id.exit_btn) {
 			// exit
 			AlertDialog.Builder newDialog = new AlertDialog.Builder(this);
@@ -254,8 +264,9 @@ public class MainActivity extends Activity implements OnClickListener {
 					Intent.ACTION_PICK,
 					android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 			startActivityForResult(gallery, SELECT_IMAGE);
-		}
 
+		}
+ */
 	}
 
 	@Override
@@ -274,10 +285,6 @@ public class MainActivity extends Activity implements OnClickListener {
 			cursor.close();
 
             drawView.loadBitmap( picturePath );
-
-
-           // drawView.setBackground(Drawable.createFromPath(picturePath));
-
 
 		}
 	}

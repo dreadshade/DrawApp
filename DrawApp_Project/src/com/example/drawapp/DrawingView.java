@@ -1,5 +1,7 @@
 package com.example.drawapp;
 
+import java.util.ArrayList;
+
 import android.graphics.*;
 import android.view.MotionEvent;
 import android.view.View;
@@ -27,14 +29,19 @@ public class DrawingView extends View {
 	private boolean erase = false;
     // path
     private float mX, mY;
-    private static final float TOUCH_TOLERANCE = 8;
+    private static final float TOUCH_TOLERANCE = 2;
     // options
     //private BlurMaskFilter drawBlur;
     //private static final float mRadius = 1/10;
-
+    // undo and redo
+    public ArrayList<Path> paths = new ArrayList<Path>(3);
+    public ArrayList<Path> undonePaths = new ArrayList<Path>(3);
     public DrawingView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		setupDrawing();
+        setFocusable(true);
+        setFocusableInTouchMode(true);
+
+        setupDrawing();
 	}
 
 	private void setupDrawing() {
@@ -46,7 +53,6 @@ public class DrawingView extends View {
 		// get drawing area setup for interaction
 		drawPath = new Path();
 		drawPaint = new Paint();
-
 		// set color
 		drawPaint.setColor(paintColor);
 
@@ -56,6 +62,7 @@ public class DrawingView extends View {
 		drawPaint.setStyle(Paint.Style.STROKE);
 		drawPaint.setStrokeJoin(Paint.Join.ROUND);
 		drawPaint.setStrokeCap(Paint.Cap.ROUND);
+        drawPaint.setPathEffect(new CornerPathEffect(10));
         drawPaint.setDither(true);
         // set properties - Blur-Mask
     //    drawBlur = new BlurMaskFilter(1, BlurMaskFilter.Blur.NORMAL);
@@ -77,6 +84,9 @@ public class DrawingView extends View {
 	protected void onDraw(Canvas canvas) {
 		// draw view
 		canvas.drawBitmap(canvasBitmap, 0, 0, canvasPaint);
+        for (Path p : paths) {
+            canvas.drawPath(p, drawPaint);
+        }
 		canvas.drawPath(drawPath, drawPaint);
 	}
 
@@ -85,6 +95,8 @@ public class DrawingView extends View {
         float dy = Math.abs(y - mY);
         if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
             drawPath.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
+            //drawPath.quadTo(mX, mY, (x + dx) / 2, (y + dy) / 2);
+            //drawPath.cubicTo((mX + dx) / 5 , (mY + dy) / 5 , (mX - dx) / 5, (mY - dy) / 5, mX, mY );
             mX = x;
             mY = y;
         }
@@ -98,19 +110,22 @@ public class DrawingView extends View {
 
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
+            undonePaths.clear();
             drawPath.reset();
 			drawPath.moveTo(touchX, touchY);
             mX = touchX;
             mY = touchY;
-			break;
+            break;
 		case MotionEvent.ACTION_MOVE:
             touch_move(touchX, touchY);
-			break;
+            break;
 		case MotionEvent.ACTION_UP:
             drawPath.lineTo(touchX, touchY);
 			drawCanvas.drawPath(drawPath, drawPaint);
+            paths.add(drawPath);
+            drawPath = new Path();
 			drawPath.reset();
-			break;
+            break;
 		default:
 			return false;
 		}
