@@ -29,7 +29,7 @@ public class DrawingView extends View {
 	private boolean erase = false;
     // path
     private float mX, mY;
-    private static final float TOUCH_TOLERANCE = 2;
+    private static final float TOUCH_TOLERANCE = 8;
     // options
     //private BlurMaskFilter drawBlur;
     //private static final float mRadius = 1/10;
@@ -169,6 +169,8 @@ public class DrawingView extends View {
 	
 	public void startNew(){
 	    drawCanvas.drawColor(0, PorterDuff.Mode.CLEAR);
+        paths.clear();
+        undonePaths.clear();
 	    invalidate();
 	}
 
